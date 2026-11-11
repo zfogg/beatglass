@@ -1950,12 +1950,14 @@ int main(int argc, char** argv) {
             if (packet.discontinuity) ++live_discontinuities;
             double energy = 0.0;
             float peak = 0.0f;
-            for (std::size_t sample = 0; sample < packet.sample_count; sample += packet_channels) {
-              const auto value = std::abs(packet.samples[sample]);
-              energy += static_cast<double>(value) * value;
-              peak = std::max(peak, value);
+            for (std::size_t frame = 0; frame < packet_frames; ++frame) {
+              for (std::uint32_t channel = 0; channel < packet_channels; ++channel) {
+                const auto value = std::abs(packet.samples[frame * packet_channels + channel]);
+                energy += static_cast<double>(value) * value;
+                peak = std::max(peak, value);
+              }
             }
-            const auto sample_count = std::max<std::size_t>(1, packet_frames);
+            const auto sample_count = std::max<std::size_t>(1, packet_frames * packet_channels);
             const auto rms = static_cast<float>(std::sqrt(energy / static_cast<double>(sample_count)));
             live_signal_confidence = std::clamp(std::max(rms, peak * 0.35f) * 2.0f, 0.0f, 1.0f);
             const auto state = live_replay->process(block);
@@ -2082,8 +2084,14 @@ int main(int argc, char** argv) {
             live_observed_frames = packet.first_frame + packet_frames;
             if (packet.discontinuity) ++live_discontinuities;
             double energy = 0.0; float peak = 0.0f;
-            for (std::size_t sample = 0; sample < packet.sample_count; sample += packet_channels) { const auto value = std::abs(packet.samples[sample]); energy += static_cast<double>(value) * value; peak = std::max(peak, value); }
-            live_signal_confidence = std::clamp(std::max(static_cast<float>(std::sqrt(energy / static_cast<double>(std::max<std::size_t>(1, packet_frames)))), peak * 0.35f) * 2.0f, 0.0f, 1.0f);
+            for (std::size_t frame = 0; frame < packet_frames; ++frame) {
+              for (std::uint32_t channel = 0; channel < packet_channels; ++channel) {
+                const auto value = std::abs(packet.samples[frame * packet_channels + channel]);
+                energy += static_cast<double>(value) * value;
+                peak = std::max(peak, value);
+              }
+            }
+            live_signal_confidence = std::clamp(std::max(static_cast<float>(std::sqrt(energy / static_cast<double>(std::max<std::size_t>(1, packet_frames * packet_channels)))), peak * 0.35f) * 2.0f, 0.0f, 1.0f);
             const auto state = live_replay->process(block);
             live_bpm = state.bpm; live_tracking_state = state.state; live_beats = state.beats;
             beatglass::Snapshot presentation_snapshot; presentation_snapshot.state = state.state; presentation_snapshot.observed_through = {state.epoch, state.observed_through}; presentation_snapshot.analysis_delay_frames = state.observed_through >= state.analyzed_through ? state.observed_through - state.analyzed_through : 0; presentation_snapshot.bpm = state.bpm; presentation_snapshot.confidence = live_signal_confidence; for (const auto frame : state.beat_frames) presentation_snapshot.beats.push_back({{state.epoch, frame}, 1.0f});
