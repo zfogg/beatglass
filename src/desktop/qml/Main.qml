@@ -252,7 +252,7 @@ ApplicationWindow {
         objectName: "overlayUnlockFocusShortcut"
         sequence: "Ctrl+Alt+U"
         context: Qt.ApplicationShortcut
-        enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough
+        enabled: window.overlayBridge && window.overlayBridge.clickThrough
         onActivated: {
             window.focusOverlayUnlockShortcut()
         }
