@@ -4960,8 +4960,6 @@ ApplicationWindow {
                         id: showOverlay
                         objectName: "showOverlay"
                         property bool focusRequested: false
-                        readonly property var Accessible: ({ description: "Show the DJ overlay window" })
-                        readonly property var ToolTip: ({ text: "Show the DJ overlay and hide the control window" })
                         readonly property bool visible: showOverlayButton.visible
                         readonly property bool activeFocus: focusRequested || showOverlayButton.activeFocus
                         readonly property bool enabled: showOverlayButton.enabled
