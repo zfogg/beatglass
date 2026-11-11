@@ -2219,7 +2219,8 @@ int main(int argc, char** argv) {
       // repainting it ten times per second, which floods narrow PTYs and can
       // make the warning look broken. Once the layout fits, Custom events
       // resume for live capture, playback, progress and spinner updates.
-      if (!compact_layout.load(std::memory_order_acquire)) screen.PostEvent(Event::Custom);
+      if (!compact_layout.load(std::memory_order_acquire) && screen.dimx() >= 100 && screen.dimy() >= 28)
+        screen.PostEvent(Event::Custom);
     }
   });
   screen.Loop(root_component);
