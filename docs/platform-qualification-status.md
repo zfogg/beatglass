@@ -1,5 +1,15 @@
 # Platform qualification status
 
+## v2 design and implementation boundary
+
+The v2 screen map is recorded in [`v2-status.md`](v2-status.md), including the
+committed reference screenshot paths and portable commands. The v2 GUI entries
+are implemented slices, not native support claims; the v2 CLI live/library/
+command-palette/settings surfaces remain design-only. Token validation and QML
+contract checks cannot advance Windows, macOS, or Linux desktop/audio/overlay
+qualification. Keep the platform rows and readiness report below as the source
+of truth for support status.
+
 ## macOS qualification rerun (2026-11-10)
 
 The merged qualification fixes were exercised on the Intel MacBookPro16,1

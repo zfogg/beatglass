@@ -11,6 +11,8 @@
 
 These four screens are the current v1 prototype renderings: the desktop library, track analysis, DJ monitoring, and floating overlay. They are illustrative design-system renders, not native-platform qualification evidence. See [`design/v1`](design/v1/) for the source, states, tokens, and reproducible Playwright renderer. The overlay design-system evidence gallery is [latest overlay evidence gallery on `main`](https://github.com/zfogg/beatglass/blob/main/docs/overlay-design-gallery.md); it indexes the committed workflow/component renderings and native screenshot qualification states.
 
+The v2 screen map is documented in [`docs/v2-status.md`](docs/v2-status.md). It separates implemented native GUI slices (Library, FFT, add-folder, DJ, output recovery) from design-only CLI surfaces (live, Library, command palette, Settings). The v2 token contract is in [`design/v2`](design/v2/); v2 screenshot paths and exact local checks are recorded in that status page.
+
 Decoder snapshot validation is fail-closed: a retry is eligible only when the persisted `decoder_snapshot` is non-empty and matches the active decoder identity. Empty legacy snapshots and mismatched snapshots are rejected; they must be re-analyzed to establish fresh provenance.
 
 `decoder_snapshot` is a compatibility anchor for retryable analysis. A persisted run may be resubmitted only when its snapshot matches the active decoder/configuration contract; legacy rows with an empty snapshot are rejected conservatively until re-analysis establishes fresh metadata.

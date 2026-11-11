@@ -31,6 +31,15 @@ The source adapters, library backend, DSP and UI agents can propose the typed er
 The merged qualification tooling now provides a fail-closed handoff path: the status checker requires Windows, macOS and Linux rows; the retained-bundle verifier checks provenance, hashes, canonical paths, required scenario IDs, duplicate/unknown scenarios and one retained artifact per completed scenario; and the report exposes per-platform and aggregate readiness failures. These are preparation and evidence-integrity gates, not native qualification results. Actual desktop, audio and overlay observations on supported hardware remain open, and headless tests, CI, WSL, SSH-only runs and portable fixtures do not satisfy the native gate.
 
 The shared readiness report uses `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes`. Support language remains experimental until native qualification is complete.
+
+## v2 documentation boundary
+
+The v2 GUI/CLI screen map and implemented-versus-design-only boundary are
+maintained in [`v2-status.md`](v2-status.md). The v2 token manifest is a shared
+presentation contract, not evidence that the CLI surfaces, native capture, or
+overlay behavior are complete. Run the portable checks listed there before
+reviewing a v2 documentation change; native platform gates remain governed by
+the qualification status below.
 # Phase 0 qualification handoff
 
 The local exit-gate workflow is the retained-evidence pipeline documented in `docs/platform-qualification-status.md`: ingest native-script artifacts, generate and validate the conservative report, then run the downstream consumer. A successful portable run proves only that the evidence handoff is internally consistent; it does not satisfy the native Windows, macOS, or Linux desktop/audio/overlay gates. `PENDING` is the expected state until those observations exist.

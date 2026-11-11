@@ -1,5 +1,14 @@
 # Progress and handoff
 
+## v2 screen-map status — 2026-11-11
+
+Issue #4803 documents the current v2 boundary in [`v2-status.md`](v2-status.md).
+The native GUI has implemented slices for Library, source-PCM FFT mode,
+add-folder, DJ, and output recovery. The v2 CLI live/library/command-palette/
+settings screens remain design-only. The token contract is validated with
+`Push-Location design/v2; node check.mjs; Pop-Location`; this portable check and
+the committed v1 reference screenshots do not establish native qualification.
+
 ## Current native qualification snapshot (2026-11-10)
 
 The current main line has passing Windows qualification contracts for cache
