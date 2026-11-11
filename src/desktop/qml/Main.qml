@@ -5131,7 +5131,9 @@ ApplicationWindow {
                     Button {
                         id: retryOverlayButton
                         objectName: "overlayCaptureRecoveryAction"
-                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null
+                            && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring"
+                                || window.overlayDisplayRecoveryPending || window.overlayLaunchFallbackActive)
                         text: "Retry overlay capture"
                         enabled: visible && window.captureMonitorBridge.start !== undefined
                         Accessible.name: text
