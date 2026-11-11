@@ -8,6 +8,9 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+help_result = subprocess.run([exe, "--help"], capture_output=True, text=True, check=True)
+for option in ("-h, --help", "-V, --version", "--replay", "--json", "--"):
+    assert option in help_result.stdout, (option, help_result.stdout)
 missing_argument = subprocess.run([exe], capture_output=True, text=True)
 assert missing_argument.returncode == 2 and "Usage: beatglass-cli" in missing_argument.stdout
 extra_argument = subprocess.run([exe, "one.wav", "two.wav"], capture_output=True, text=True)
