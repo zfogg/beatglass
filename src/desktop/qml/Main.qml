@@ -5899,18 +5899,26 @@ ApplicationWindow {
                             Layout.fillWidth: true
                         }
                         Repeater {
-                            model: typeof libraryPreferences !== "undefined" ? libraryPreferences.folders : []
+                            model: typeof libraryPreferences !== "undefined" ? libraryPreferences.roots : []
                             delegate: RowLayout {
                                 objectName: "libraryDirectoryRow"
                                 Layout.fillWidth: true
-                                Label { text: modelData; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: "Library directory " + modelData; Accessible.role: Accessible.StaticText }
+                                required property var modelData
+                                readonly property string sourceId: modelData.sourceId
+                                readonly property string directoryPath: modelData.path
+                                Label { text: directoryPath; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: "Library directory " + text; Accessible.role: Accessible.StaticText }
+                                Label { objectName: "libraryDirectoryStatus"; text: modelData.scanState === "error" ? "Error: " + modelData.lastError : modelData.scanState === "scanning" ? "Scanning…" : modelData.scanState === "ready" ? "Ready" : "Not scanned"; Accessible.name: "Directory status: " + text; Accessible.role: Accessible.Status }
+                                Button { objectName: "moveLibraryDirectoryUp"; text: "Up"; enabled: index > 0; Accessible.name: "Move directory up"; onClicked: libraryPreferences.moveFolder(sourceId, -1) }
+                                Button { objectName: "moveLibraryDirectoryDown"; text: "Down"; enabled: index < libraryPreferences.roots.length - 1; Accessible.name: "Move directory down"; onClicked: libraryPreferences.moveFolder(sourceId, 1) }
+                                Button { objectName: "rescanLibraryDirectory"; text: "Rescan"; Accessible.name: "Rescan Library directory"; Accessible.description: "Refresh this directory's catalog and report access errors."; onClicked: { if (window.browseFolder.toString() === directoryPath) window.refreshCatalog(); libraryPreferences.setFolderScanState(sourceId, "scanning", ""); rescanDirectoryTimer.restart() } }
+                                Button { objectName: "revealLibraryDirectory"; text: "Reveal"; Accessible.name: "Reveal Library directory"; Accessible.description: "Open this directory in the Beatglass folder browser."; onClicked: { window.browseFolder = directoryPath; window.refreshCatalog(); window.announceVisualizationRecovery("Library directory opened: " + directoryPath); forceActiveFocus() } }
                                 Button {
                                     objectName: "removeLibraryDirectory"
                                     text: "Remove"
                                     activeFocusOnTab: true
                                     Accessible.name: "Remove Library directory " + modelData
                                     Accessible.description: "Remove this directory from the Library scan list; source audio is not changed."
-                                    onClicked: { window.pendingRemoveFolder = modelData; removeFolderDialog.open() }
+                                    onClicked: { window.pendingRemoveFolder = directoryPath; removeFolderDialog.open() }
                                 }
                             }
                         }
@@ -5922,6 +5930,7 @@ ApplicationWindow {
                             Accessible.description: "Choose another local directory to add to the Library scan list."
                             onClicked: { window.openLibraryFolderChooser(); forceActiveFocus() }
                         }
+                        Timer { id: rescanDirectoryTimer; interval: 250; repeat: false; onTriggered: { if (typeof libraryPreferences !== "undefined") { for (const root of libraryPreferences.roots) if (root.path === window.browseFolder.toString()) libraryPreferences.setFolderScanState(root.sourceId, "ready", "") } window.refreshCatalog() } }
                     }
                 }
                 GroupBox {
@@ -6114,7 +6123,7 @@ ApplicationWindow {
             Label { objectName: "removeFolderPath"; text: window.pendingRemoveFolder; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: "Directory to remove: " + text }
             Label { text: "This removes the directory from Beatglass's scan list. Source audio and files are not changed."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
             RowLayout { Layout.fillWidth: true
-                Button { id: removeFolderConfirm; objectName: "removeFolderConfirm"; text: "Remove directory"; onClicked: { if (typeof libraryPreferences !== "undefined") libraryPreferences.removeFolder(window.pendingRemoveFolder); window.announceVisualizationRecovery("Library directory removed; remaining directories stay configured."); removeFolderDialog.close(); addLibraryDirectory.forceActiveFocus() } }
+                Button { id: removeFolderConfirm; objectName: "removeFolderConfirm"; text: "Remove directory"; onClicked: { if (typeof libraryPreferences !== "undefined") { for (const root of libraryPreferences.roots) if (root.path === window.pendingRemoveFolder) libraryPreferences.removeFolder(root.sourceId) }; window.announceVisualizationRecovery("Library directory removed; remaining directories stay configured."); removeFolderDialog.close(); addLibraryDirectory.forceActiveFocus() } }
                 Button { id: removeFolderCancel; objectName: "removeFolderCancel"; text: "Cancel"; onClicked: { removeFolderDialog.close(); addLibraryDirectory.forceActiveFocus() } }
             }
         }
