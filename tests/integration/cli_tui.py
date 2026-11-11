@@ -65,6 +65,7 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
                 assert control in plain, (tab, control, result.stdout)
             assert "Capture state: Stopped" in plain
             assert "Key: —    Chord: —" in plain
+            assert "active 2×" in plain
         if tab == "settings":
             assert "Seek step (1–60 seconds): 17" in plain
             assert "Mode: beat_grid" in plain
