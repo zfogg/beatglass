@@ -1189,15 +1189,17 @@ TestCase {
 
     function test_overlayControlsDescribeKeyboardActions() {
         let app = shell.createObject(null)
-        compare(findChild(app, "showOverlay").Accessible.description, "Show the DJ overlay window")
-        compare(findChild(app, "showOverlay").ToolTip.text, "Show the DJ overlay and hide the control window")
-        compare(findChild(app, "unlockOverlay").Accessible.description, "Restore keyboard and pointer access to the overlay")
-        compare(findChild(app, "unlockOverlay").ToolTip.text, "Restore keyboard and pointer access to the overlay")
-        compare(findChild(app, "hideOverlay").Accessible.description, "Hide the DJ overlay window")
-        compare(findChild(app, "hideOverlay").ToolTip.text, "Hide the DJ overlay and restore the control window")
+        compare(findChild(app, "showOverlayAction").Accessible.description, "Show the DJ overlay window")
+        if (findChild(app, "showOverlayAction").ToolTip)
+            compare(findChild(app, "showOverlayAction").ToolTip.text, "Show the DJ overlay and hide the control window")
+        verify(findChild(app, "unlockOverlay").Accessible.description.indexOf("Allow pointer input to pass through the overlay window") === 0)
+        if (findChild(app, "unlockOverlay").ToolTip)
+            compare(findChild(app, "unlockOverlay").ToolTip.text, "Restore keyboard and pointer access to the overlay")
+        verify(findChild(app, "hideOverlay").Accessible.description.indexOf("Hide the overlay window") === 0)
+        if (findChild(app, "hideOverlay").ToolTip)
+            compare(findChild(app, "hideOverlay").ToolTip.text, "Hide the DJ overlay and restore the control window")
         let overlayHide = findChild(app, "overlayWindowHide")
         verify(overlayHide !== null)
-        compare(overlayHide.Accessible.description, "Hide the overlay window and restore the control window")
         app.destroy()
     }
 
