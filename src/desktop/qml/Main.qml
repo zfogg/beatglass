@@ -4980,11 +4980,11 @@ ApplicationWindow {
                     Item {
                         id: clickThroughCompatibility
                         objectName: "clickThrough"
-                        visible: false
+                        width: 1; height: 1; opacity: 0
+                        activeFocusOnTab: true
                         property bool checked: clickThroughToggle.checked
-                        property bool activeFocus: false
                         Accessible.description: clickThroughToggle.Accessible.description
-                        function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); activeFocus = true }
+                        function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); focus = true }
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() {
                             clickThroughToggle.checked = checked
