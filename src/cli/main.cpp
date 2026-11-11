@@ -7,7 +7,15 @@
 #include <string_view>
 
 namespace {
-void usage() { std::cout << "Usage: beatglass-cli [--help] [--version] [--replay] [--json] [--] <audio-file>\n"; }
+void usage() {
+  std::cout << "Usage: beatglass-cli [options] [--] <audio-file>\n"
+            << "\nOptions:\n"
+            << "  -h, --help       Show this help and exit.\n"
+            << "  -V, --version    Show the Beatglass CLI version and exit.\n"
+            << "      --replay     Feed the file incrementally through the causal replay path.\n"
+            << "      --json       Emit machine-readable JSON (JSON Lines with --replay).\n"
+            << "      --           Stop option parsing so a path beginning with '-' is accepted.\n";
+}
 void json_string(std::string_view s) {
   constexpr char hex[] = "0123456789abcdef";
   std::cout << '"';
