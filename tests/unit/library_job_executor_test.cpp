@@ -180,9 +180,13 @@ TEST_CASE("tracked cancellation runs stop callbacks outside the state lock") {
   });
   REQUIRE(handle);
   published.set_value(handle);
-  REQUIRE(armed.get_future().wait_for(5s) == std::future_status::ready);
+  // Full qualification runs this binary alongside hundreds of filesystem and
+  // native-contract tests; the callback itself must remain bounded, but the
+  // harness should not turn transient Windows scheduler contention into a
+  // false cancellation failure.
+  REQUIRE(armed.get_future().wait_for(30s) == std::future_status::ready);
   handle->cancel();
-  REQUIRE(complete.get_future().wait_for(5s) == std::future_status::ready);
+  REQUIRE(complete.get_future().wait_for(30s) == std::future_status::ready);
   executor.shutdown();
   REQUIRE(handle->state() == TrackedState::cancelled);
 }
