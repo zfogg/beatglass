@@ -627,16 +627,17 @@ ApplicationWindow {
         }
     }
     function transitionCaptureEvidence(stale, message, focusTarget) {
-        console.log("DBG transition", stale, message)
-        window.overlayCaptureEvidenceStale = stale
+        const nativeRecoveryPending = window.overlayBridge && !window.overlayBridge.available
+        const effectiveStale = stale || nativeRecoveryPending
+        window.overlayCaptureEvidenceStale = effectiveStale
         if (message !== "") {
-            const freshness = stale
+            const freshness = effectiveStale
                     ? "Live evidence is stale until native recovery completes and fresh capture arrives."
                     : "Fresh accepted capture is available."
             window.announceCaptureRecoveryState(message + " " + freshness)
         }
         if (focusTarget) {
-            if (stale) {
+            if (effectiveStale) {
                 navigation.currentIndex = 1
                 window.show()
                 window.requestActivate()
@@ -2298,7 +2299,6 @@ ApplicationWindow {
             visualizationCanvas.forceActiveFocus()
     }
     function announceCaptureRecoveryState(message) {
-        console.log("DBG announce before", window.overlayCaptureEvidenceStale, message)
         if (window.overlayCaptureEvidenceStale && message.indexOf("native recovery completes") < 0)
             message += " Live evidence is stale until native recovery completes and fresh capture arrives."
         if (window.overlayInvalidOpacityRecoveryPending && message.indexOf("90 percent opacity") < 0)
