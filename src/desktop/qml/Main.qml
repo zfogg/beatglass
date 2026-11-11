@@ -76,6 +76,9 @@ ApplicationWindow {
     property bool storageReopenPending: false
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
+    property url pendingAddFolder: ""
+    property int addFolderScanProgress: 0
+    property string addFolderState: "ready"
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
         && analysisJobBridge !== null
         && (analysisJobBridge.status === "Complete" || analysisJobBridge.result !== "")
@@ -1171,6 +1174,31 @@ ApplicationWindow {
         }
         window.catalogDiagnostic = diagnostics.join("; ")
         return rows
+    }
+    function startAddFolderScan() {
+        if (pendingAddFolder.toString() === "") { addFolderState = "error"; return }
+        if (pendingAddFolder.toString() === browseFolder.toString()
+                || (typeof libraryPreferences !== "undefined" && pendingAddFolder.toString() === libraryPreferences.folder)) {
+            addFolderState = "duplicate"
+            return
+        }
+        addFolderScanProgress = 0
+        addFolderState = "scanning"
+        addFolderScanTimer.start()
+    }
+    function finishAddFolderScan() {
+        const rows = window.libraryCatalogBridge
+            ? window.libraryCatalogBridge.browseRecursive(pendingAddFolder, "") : []
+        if (window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== "") {
+            addFolderState = "error"
+            window.announceVisualizationRecovery(window.libraryCatalogBridge.lastDiagnostic)
+            return
+        }
+        window.browseFolder = pendingAddFolder
+        if (typeof libraryPreferences !== "undefined") libraryPreferences.folder = pendingAddFolder.toLocalFile()
+        window.refreshCatalog()
+        addFolderState = "success"
+        window.announceVisualizationRecovery("Library folder added; " + rows.length + " catalog entries found.")
     }
     function resetLibraryBrowserSelection(message) {
         window.clearSelectedAudio()
@@ -2992,7 +3020,8 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                Button { id: chooseFolder; text: "Add folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Add audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Add a local folder to the Library directory list"; ToolTip.text: "Add a local folder to the Library directory list"; onClicked: window.openLibraryFolderChooser() }
+                Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: window.openLibraryFolderChooser() }
+                    Button { id: addFolder; objectName: "addFolder"; text: "Add folder…"; activeFocusOnTab: true; Accessible.name: "Add music folder"; Accessible.description: "Choose a local music folder, validate it, and scan supported audio without changing your files."; onClicked: addFolderPicker.open() }
                     Button {
                         id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
@@ -5830,6 +5859,35 @@ ApplicationWindow {
         onTriggered: window.metadataRetryPending = false
     }
 
+    Timer { id: addFolderScanTimer; interval: 80; repeat: true; onTriggered: { addFolderScanProgress = Math.min(100, addFolderScanProgress + 10); if (addFolderScanProgress >= 100) { stop(); window.finishAddFolderScan() } } }
+    FolderDialog {
+        id: addFolderPicker
+        title: "Choose a music folder to add"
+        currentFolder: window.browseFolder
+        onAccepted: { window.pendingAddFolder = selectedFolder; window.addFolderState = "ready"; addFolderDialog.open() }
+        onRejected: addFolder.forceActiveFocus()
+    }
+    Dialog {
+        id: addFolderDialog
+        objectName: "addFolderDialog"
+        title: "Add a music folder"
+        modal: true
+        width: Math.min(window.width - 48, 620)
+        contentItem: ColumnLayout {
+            spacing: 12
+            Label { text: "Choose a folder to index. Your files stay where they are."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            Label { objectName: "addFolderPath"; text: window.pendingAddFolder.toLocalFile(); elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: "Selected folder: " + text }
+            Label { objectName: "addFolderStatus"; text: window.addFolderState === "scanning" ? "Scanning supported audio… " + window.addFolderScanProgress + "%" : window.addFolderState === "duplicate" ? "This folder is already in your Library." : window.addFolderState === "error" ? "The folder could not be scanned. Check access and retry." : window.addFolderState === "success" ? "Folder added successfully." : "Ready to scan"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.role: Accessible.Status; Accessible.name: "Add folder status: " + text }
+            ProgressBar { objectName: "addFolderProgress"; from: 0; to: 100; value: window.addFolderScanProgress; visible: window.addFolderState === "scanning"; Layout.fillWidth: true }
+            Label { text: "Beatglass indexes supported audio and builds local waveform/FFT metadata. It never moves, tags, or overwrites your files."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            RowLayout { Layout.fillWidth: true
+                Button { id: addFolderConfirm; objectName: "addFolderConfirm"; text: window.addFolderState === "duplicate" ? "Choose another" : "Add folder"; enabled: window.addFolderState === "ready" || window.addFolderState === "duplicate" || window.addFolderState === "error"; onClicked: window.addFolderState === "duplicate" ? addFolderPicker.open() : window.startAddFolderScan() }
+                Button { id: addFolderRetry; objectName: "addFolderRetry"; text: "Retry"; visible: window.addFolderState === "error"; onClicked: { window.addFolderState = "ready"; window.startAddFolderScan() } }
+                Button { id: addFolderCancel; objectName: "addFolderCancel"; text: window.addFolderState === "scanning" ? "Cancel scan" : "Cancel"; onClicked: { addFolderScanTimer.stop(); window.addFolderState = "ready"; addFolderDialog.close(); addFolder.forceActiveFocus() } }
+            }
+        }
+        onOpened: addFolderConfirm.forceActiveFocus()
+    }
     FolderDialog {
         id: folderPicker
         title: "Choose a folder to browse"
