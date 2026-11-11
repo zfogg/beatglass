@@ -890,7 +890,7 @@ ApplicationWindow {
                 window.overlayDisplaySelectionRequired = true
                 window.announceCaptureRecoveryState("Overlay actions disabled; control-window fallback remains available until the native overlay recovers.")
                 window.overlayWasVisibleBeforeAvailabilityLoss = djOverlay.visible
-                if (djOverlay.visible) {
+                if (window.overlayWasVisibleBeforeAvailabilityLoss || djOverlay.visible) {
                     window.hideOverlayAndRestoreControls()
                     window.overlayHiddenByUser = false
                     window.overlayDisplayRecoveryPending = true
