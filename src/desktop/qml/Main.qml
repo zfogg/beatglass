@@ -947,6 +947,7 @@ ApplicationWindow {
             window.overlayDisplaySelectionRequired = true
             window.overlayCaptureEvidenceStale = true
             window.focusOverlayAvailabilityRecovery("DJ overlay is unavailable; control-window fallback remains active until the display recovers.", retryOverlay)
+            console.log("DBG pending set", window.overlayDisplayRecoveryPending)
         }
         refreshCatalog()
         if (typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== "") {
