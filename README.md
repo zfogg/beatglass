@@ -116,7 +116,7 @@ desktop, capture, playback, and overlay qualification
 remain platform-specific work; see [macOS overlay status](docs/macos-overlay.md)
 and [the macOS qualification checklist](docs/macos-qualification.md).
 
-On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds PipeWire sink discovery/capture and bounded native playback plus their CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). A real daemon qualification run remains open. See [Linux platform status](docs/linux-platform-increment.md).
+On Linux, CMake automatically enables PipeWire sink discovery/capture and bounded native playback when `pkg-config` finds `libpipewire-0.3`; install the development package first (for Ubuntu, `libpipewire-0.3-dev`). Set `-DBEATGLASS_BUILD_PIPEWIRE=OFF` to force a dependency-light build, or `ON` to require PipeWire and fail early when it is unavailable. A real daemon qualification run remains open. See [Linux platform status](docs/linux-platform-increment.md).
 
 The shipped `beatglass-cli` and `beatglass-music-cli` report decoder/analysis
 failures on stderr with an `error: ` prefix and exit with status 1;
