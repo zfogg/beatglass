@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "engine": "playwright",
+  "font": "Inter, Segoe UI, Arial, sans-serif",
+  "defaultThreshold": { "maxDiffPixels": 80, "maxDiffPixelRatio": 0.002 },
+  "fixtures": [
+    { "id": "gui-library", "surface": "gui", "screen": "library", "viewport": [1440, 900], "baseline": "baselines/gui-library.png" },
+    { "id": "gui-library-fft", "surface": "gui", "screen": "library-fft", "viewport": [1440, 900], "baseline": "baselines/gui-library-fft.png" },
+    { "id": "gui-library-folder-popup", "surface": "gui", "screen": "library-folder-popup", "viewport": [1440, 900], "baseline": "baselines/gui-library-folder-popup.png" },
+    { "id": "gui-dj", "surface": "gui", "screen": "dj", "viewport": [1440, 900], "baseline": "baselines/gui-dj.png" },
+    { "id": "gui-dj-fft", "surface": "gui", "screen": "dj-fft", "viewport": [1440, 900], "baseline": "baselines/gui-dj-fft.png" },
+    { "id": "gui-dj-output-popup", "surface": "gui", "screen": "dj-output-popup", "viewport": [1440, 900], "baseline": "baselines/gui-dj-output-popup.png" },
+    { "id": "cli-live", "surface": "cli", "screen": "cli-live", "viewport": [1280, 800], "baseline": "baselines/cli-live.png" },
+    { "id": "cli-library", "surface": "cli", "screen": "cli-library", "viewport": [1280, 800], "baseline": "baselines/cli-library.png" },
+    { "id": "cli-palette", "surface": "cli", "screen": "cli-palette", "viewport": [1280, 800], "baseline": "baselines/cli-palette.png" },
+    { "id": "cli-settings", "surface": "cli", "screen": "cli-settings", "viewport": [1280, 800], "baseline": "baselines/cli-settings.png" }
+  ]
+}
