@@ -1703,12 +1703,12 @@ ApplicationWindow {
             window.focusOverlayRecoveryPauseState("Overlay recovery is paused; Resume recovery before retrying.", resumeOverlayRecovery)
             return false
         }
+        window.overlayRecoveryAttemptCount += 1
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Overlay retry is unavailable until the native overlay and a destination display are ready.", overlayDisplay)
             return false
         }
         window.overlayRecoveryPausedByUser = false
-        window.overlayRecoveryAttemptCount += 1
         window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
         const retried = window.showOverlayAndHideControls()
         overlayDisplayStatus.forceActiveFocus()
