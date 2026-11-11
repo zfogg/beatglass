@@ -6,6 +6,15 @@
 #include <algorithm>
 #include <cctype>
 #include <system_error>
+#ifdef _WIN32
+#include <fcntl.h>
+#include <io.h>
+#include <share.h>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 namespace beatglass {
 namespace {
 bool unsupported_extension(const std::filesystem::path& path) {
@@ -32,7 +41,22 @@ struct FileReader::Impl {
   }
   Impl(const std::filesystem::path& path, std::uint64_t initial) : path(path), epoch(initial) {
 #ifdef _WIN32
-    handle = sf_wchar_open(path.c_str(), SFM_READ, &info);
+    // Permit another process to replace or remove the path while the decoder
+    // keeps its handle open. We still detect replacement via size/mtime before
+    // every read and seek, so sharing does not weaken source integrity.
+    int descriptor = -1;
+    const auto native_handle = CreateFileW(
+        path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (native_handle != INVALID_HANDLE_VALUE) {
+      descriptor = _open_osfhandle(reinterpret_cast<intptr_t>(native_handle), _O_RDONLY | _O_BINARY);
+    }
+    if (descriptor >= 0) {
+      handle = sf_open_fd(descriptor, SFM_READ, &info, SF_TRUE);
+      if (!handle) _close(descriptor);
+    } else if (native_handle != INVALID_HANDLE_VALUE) {
+      CloseHandle(native_handle);
+    }
 #else
     handle = sf_open(path.c_str(), SFM_READ, &info);
 #endif
