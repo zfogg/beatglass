@@ -1635,8 +1635,8 @@ int main(int argc, char** argv) {
     live_status = "Native loopback capture is unavailable in this build.";
 #endif
   };
-  auto live_button = Button(&live_button_label, toggle_live);
-  auto refresh_live_button = Button(" Refresh sinks ", [&] {
+  auto live_button = Button(&live_button_label, toggle_live, compact_button_option);
+  auto refresh_live_button = Button("Refresh sinks", [&] {
 #ifdef _WIN32
     const auto stopped_for_refresh = live_session && live_session->state() != beatglass::SourceState::stopped;
     if (stopped_for_refresh) {
@@ -1681,8 +1681,8 @@ int main(int argc, char** argv) {
 #else
     live_status = "Native sink discovery is unavailable in this build.";
 #endif
-  });
-  auto reset_live_button = Button(" Reset / reacquire ", [&] {
+  }, compact_button_option);
+  auto reset_live_button = Button("Reset / reacquire", [&] {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) live_session->stop();
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
@@ -1710,15 +1710,15 @@ int main(int argc, char** argv) {
 #else
     live_status = "Native loopback capture is unavailable in this build.";
 #endif
-  });
+  }, compact_button_option);
   auto set_live_multiplier = [&](float multiplier) {
     live_bpm_multiplier = multiplier;
     live_status = std::string("Displayed tempo correction set to ") + (multiplier < 1.0f ? "half" : multiplier > 1.0f ? "double" : "normal") + " BPM.";
     persist_preferences();
   };
-  auto half_bpm_button = Button(" ½ BPM ", [&] { set_live_multiplier(0.5f); });
-  auto normal_bpm_button = Button(" Normal BPM ", [&] { set_live_multiplier(1.0f); });
-  auto double_bpm_button = Button(" 2× BPM ", [&] { set_live_multiplier(2.0f); });
+  auto half_bpm_button = Button("½ BPM", [&] { set_live_multiplier(0.5f); }, compact_button_option);
+  auto normal_bpm_button = Button("Normal BPM", [&] { set_live_multiplier(1.0f); }, compact_button_option);
+  auto double_bpm_button = Button("2× BPM", [&] { set_live_multiplier(2.0f); }, compact_button_option);
   RadioboxOption endpoint_picker_option;
   endpoint_picker_option.on_change = [&] {
     if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoints.size())) return;
@@ -1792,11 +1792,11 @@ int main(int argc, char** argv) {
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto set_visual_mode = [&](std::string mode) { visual_mode = std::move(mode); persist_preferences(); };
-  auto waveform_mode_button = Button(" Waveform ", [&] { set_visual_mode("waveform"); });
-  auto spectrum_mode_button = Button(" Spectrum ", [&] { set_visual_mode("spectrum"); });
-  auto combined_mode_button = Button(" Combined ", [&] { set_visual_mode("combined"); });
-  auto beat_grid_mode_button = Button(" Beat grid ", [&] { set_visual_mode("beat_grid"); });
-  auto tonal_history_mode_button = Button(" Tonal history ", [&] { set_visual_mode("tonal_history"); });
+  auto waveform_mode_button = Button("Waveform", [&] { set_visual_mode("waveform"); }, compact_button_option);
+  auto spectrum_mode_button = Button("Spectrum", [&] { set_visual_mode("spectrum"); }, compact_button_option);
+  auto combined_mode_button = Button("Combined", [&] { set_visual_mode("combined"); }, compact_button_option);
+  auto beat_grid_mode_button = Button("Beat grid", [&] { set_visual_mode("beat_grid"); }, compact_button_option);
+  auto tonal_history_mode_button = Button("Tonal history", [&] { set_visual_mode("tonal_history"); }, compact_button_option);
   RadioboxOption playback_device_option;
   playback_device_option.on_change = [&] {
     persist_preferences();

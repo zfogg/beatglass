@@ -12,6 +12,9 @@ def main() -> int:
     required["batch action"] = 'Button("Analyze all"'
     required["cancel action"] = 'Button("Cancel analysis"'
     required["folder action"] = 'Button("Open folder"'
+    required["live bpm correction"] = 'Button("½ BPM"'
+    required["live reset"] = 'Button("Reset / reacquire"'
+    required["refresh sinks"] = 'Button("Refresh sinks"'
     missing = [name for name, marker in required.items() if marker not in (tool if name == "tool rename" else tui)]
     if missing: raise SystemExit("Missing issue #4320 TUI markers: " + ", ".join(missing))
     if "open_folder_in_file_manager" not in tui or "ShellExecuteW" not in tui or "xdg-open --" not in tui or "shell_quote" not in tui or "'\\\\''" not in tui:
