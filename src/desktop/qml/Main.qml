@@ -630,9 +630,7 @@ ApplicationWindow {
         window.overlayCaptureEvidenceStale = stale
         if (message !== "") {
             const freshness = stale
-                    ? ((window.overlayBridge && !window.overlayBridge.available)
-                        ? "Live evidence is stale until native recovery completes and fresh capture arrives."
-                        : "Live evidence is stale until fresh capture arrives.")
+                    ? "Live evidence is stale until native recovery completes and fresh capture arrives."
                     : "Fresh accepted capture is available."
             window.announceCaptureRecoveryState(message + " " + freshness)
         }
