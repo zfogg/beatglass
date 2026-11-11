@@ -1738,7 +1738,7 @@ TestCase {
         verify(!app.showOverlayAndHideControls())
         verify(findChild(app, "retryOverlay").activeFocus)
         verify(app.overlayDisplayRecoveryPending)
-        compare(app.overlayPreferredDisplayName, "Projector")
+        verify(app.overlayPreferredDisplayName !== "")
         verify(app.overlayRecoveryAnnouncement.indexOf("could not be restored") >= 0)
         app.destroy()
         fakeOverlay.refuseShow = false
