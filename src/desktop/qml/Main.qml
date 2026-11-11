@@ -5151,6 +5151,7 @@ ApplicationWindow {
                         id: retryOverlay
                         objectName: "retryOverlay"
                         property bool focusRequested: false
+                        readonly property bool visible: retryOverlayButton.visible
                         readonly property bool activeFocus: focusRequested || retryOverlayButton.activeFocus
                         readonly property bool enabled: retryOverlayButton.enabled
                         readonly property string text: retryOverlayButton.text
