@@ -132,6 +132,9 @@ if(BUILD_TESTING)
     add_test(NAME issue4320_tui_contract
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4320_tui_contract.py)
     set_tests_properties(issue4320_tui_contract PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME issue4801_tui_popups_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4801_tui_popups_contract.py)
+    set_tests_properties(issue4801_tui_popups_contract PROPERTIES LABELS unit TIMEOUT 10)
     add_test(NAME cli_navigation_model
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_cli_navigation_model.py)
     set_tests_properties(cli_navigation_model PROPERTIES LABELS unit TIMEOUT 10)
