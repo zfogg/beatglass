@@ -4270,6 +4270,58 @@ ApplicationWindow {
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Current output monitoring state and the next action needed to produce live estimates. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.")
                     ToolTip.text: "Live monitoring state and next action; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
+                    Label { objectName: "liveSourceLabel"; text: "Output source"; font.bold: true; Accessible.name: "Live output source"; Accessible.role: Accessible.Heading }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        ComboBox {
+                            id: liveSourceSelector
+                            objectName: "liveSourceSelector"
+                            model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []
+                            textRole: "name"
+                            enabled: count > 0 && window.captureMonitorBridge && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"
+                            Layout.fillWidth: true
+                            Accessible.name: "Live output source selector"
+                            Accessible.description: count > 0 ? "Select the system output endpoint used for live monitoring." : "No output endpoints are available. Refresh endpoints or check capture permissions."
+                            onActivated: {
+                                window.overlayCaptureEvidenceStale = true
+                                const accepted = window.endpointSelectionBridge && window.endpointSelectionBridge.select(currentValue.id)
+                                if (accepted && window.captureMonitorBridge) window.captureMonitorBridge.start()
+                                window.announceCaptureRecoveryState(accepted ? "Live output source selected; monitoring is reacquiring fresh evidence." : "Live output source selection failed; the previous source remains active.")
+                            }
+                        }
+                        Button {
+                            objectName: "refreshLiveSources"
+                            text: "Refresh"
+                            enabled: window.endpointSelectionBridge !== null
+                            activeFocusOnTab: true
+                            Accessible.name: "Refresh live output sources"
+                            Accessible.description: "Refresh enumerated system output endpoints without changing source audio."
+                            ToolTip.text: Accessible.description
+                            onClicked: { window.endpointSelectionBridge.refresh(); window.announceCaptureRecoveryState("Live output sources refreshed; choose an endpoint to start fresh monitoring.") }
+                        }
+                    }
+                    Label {
+                        objectName: "captureHealthStatus"
+                        Layout.fillWidth: true
+                        text: window.captureMonitorBridge
+                            ? "Capture health: " + window.captureMonitorBridge.status + (window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? " · endpoint selected" : " · no endpoint selected")
+                            : "Capture health: unavailable"
+                        Accessible.name: "Capture health status"
+                        Accessible.role: Accessible.Status
+                        Accessible.description: text + (window.overlayCaptureEvidenceStale ? ". Live visualization evidence is stale until fresh capture arrives." : ".")
+                        ToolTip.text: Accessible.description
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "outputRoutingStatus"
+                        Layout.fillWidth: true
+                        text: "Routing: monitor-only system output capture; Beatglass does not reroute or interrupt playback."
+                        Accessible.name: "Output routing status"
+                        Accessible.role: Accessible.Status
+                        Accessible.description: "The selected render endpoint is observed for analysis; playback remains owned by the source application."
+                        ToolTip.text: Accessible.description
+                        wrapMode: Text.WordWrap
+                    }
                 }
                 RowLayout {
                     objectName: "visualizationModeControls"
