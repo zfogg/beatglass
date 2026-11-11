@@ -2559,7 +2559,8 @@ ApplicationWindow {
         return window.focusOverlayAvailabilityRecovery("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.", overlayDisplay)
     }
         function onScreensChanged() {
-            if (window.overlayBridge && window.overlayBridge.displayName !== "")
+            if (window.overlayBridge && window.overlayBridge.screenNames.length > 0
+                    && window.overlayBridge.displayName !== "")
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
                 window.focusOverlayDisplayLoss()
