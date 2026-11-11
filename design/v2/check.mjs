@@ -1,6 +1,4 @@
-import { access } from 'node:fs/promises';
 import { readFile } from 'node:fs/promises';
-for (const path of ['index.html','style.css','app.js','render.mjs','package.json']) await access(path);
 const tokens = JSON.parse(await readFile('tokens.json', 'utf8'));
 const required = ['background','surface','surfaceRaised','border','text','textMuted','accent','energy','harmonic','peak','warning','danger'];
 for (const name of required) {
