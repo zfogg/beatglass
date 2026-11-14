@@ -207,6 +207,18 @@ div.highlight .fm {
   color: var(--rose);
 }
 
+/* Alabaster's declaration rule is more specific than the base signature
+   selector, so give signature keywords an explicit winning rule. */
+div.body .sig .kt,
+div.body .sig .k,
+div.body .sig .kc,
+div.body .sig .kd,
+div.body .sig .kn,
+div.body .sig .kp,
+div.body .sig .kr {
+  color: var(--sky);
+}
+
 div.sphinxsidebar {
   background: #0e162b;
   color: var(--text);
