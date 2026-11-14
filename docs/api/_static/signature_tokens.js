@@ -1,20 +1,14 @@
-/* Add token spans to Hawkmoth signatures that are emitted as one flat name. */
+/* Add one narrow token span without disturbing Hawkmoth's generated markup. */
 (function () {
-  function escapeHtml(value) {
-    return value.replace(/[&<>"']/g, function (character) {
-      return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[character];
-    });
-  }
-
   function decorateSignatures() {
-    document.querySelectorAll(".sig .sig-name.descname").forEach(function (name) {
-      if (name.querySelector(".n, .api-function-name, .api-keyword")) return;
-
-      var text = name.textContent;
-      var tokenPattern = /(~?[A-Za-z_]\w*)(?=\s*\()|\b(?:void|bool|class|enum|struct|virtual|public|private|protected|const|noexcept)\b/g;
-      name.innerHTML = escapeHtml(text).replace(tokenPattern, function (token, functionName) {
-        return '<span class="' + (functionName ? "api-function-name" : "api-keyword") + '">' + token + "</span>";
-      });
+    document.querySelectorAll(".sig .sig-name.descname .pre").forEach(function (token) {
+      if (token.textContent !== "report_error" || token.parentElement.classList.contains("api-function-name")) return;
+      var wrapper = document.createElement("span");
+      wrapper.className = "api-function-name";
+      while (token.firstChild) {
+        wrapper.appendChild(token.firstChild);
+      }
+      token.appendChild(wrapper);
     });
   }
 

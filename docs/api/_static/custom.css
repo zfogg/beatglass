@@ -202,17 +202,8 @@ div.highlight .fm {
   font-weight: 600;
 }
 
-.sig .sig-name .n {
-  color: var(--rose);
-}
-
 .sig .api-function-name {
   color: var(--rose);
-  font-weight: 600;
-}
-
-.sig .api-keyword {
-  color: var(--sky);
   font-weight: 600;
 }
 
