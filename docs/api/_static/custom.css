@@ -207,6 +207,10 @@ div.highlight .fm {
   font-weight: 600;
 }
 
+.sig .sig-name.descname {
+  color: var(--rose);
+}
+
 /* Alabaster's declaration rule is more specific than the base signature
    selector, so give signature keywords an explicit winning rule. */
 div.body .sig .kt,
