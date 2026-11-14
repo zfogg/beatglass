@@ -8,4 +8,4 @@ reference.
 .. toctree::
    :maxdepth: 2
 
-   docs/api/index
+   docs/index
