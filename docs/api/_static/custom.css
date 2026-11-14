@@ -61,22 +61,23 @@ div.body .highlight {
   overflow-x: auto;
 }
 
-/* A dark reading surface with a soft pastel palette and green wayfinding. */
+/* Beatglass v2 visual language: deep blue-green surfaces with mint energy,
+   cyan signal, violet harmony, and pink peak accents. */
 :root {
-  --bg: #10151f;
-  --surface: #18202d;
-  --surface-raised: #222d3d;
-  --text: #f4f0eb;
-  --muted: #c5c7d1;
-  --mint: #a7e8c3;
-  --sky: #a9dcff;
-  --rose: #f3b4c8;
-  --lavender: #d8c7f4;
-  --peach: #f5c4b3;
-  --border: #435064;
-  --scroll-track: #151d29;
-  --scroll-thumb: #7cc99a;
-  --scroll-thumb-hover: #a7e8c3;
+  --bg: #0b1118;
+  --surface: #121d27;
+  --surface-raised: #182733;
+  --text: #f4fbfa;
+  --muted: #9bb1b6;
+  --mint: #7af0d0;
+  --sky: #77d9ff;
+  --rose: #ff8fca;
+  --lavender: #c7a1ff;
+  --peach: #ffd27d;
+  --border: #2e4653;
+  --scroll-track: #0e1820;
+  --scroll-thumb: #4bb99d;
+  --scroll-thumb-hover: #7af0d0;
 }
 
 html {
@@ -109,6 +110,7 @@ html {
 }
 
 body {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -157,7 +159,7 @@ pre,
 div.highlight {
   background: #0a0f1d;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 7px;
 }
 
 /* Keep C++ tokens legible against the dark code surface.  Alabaster's
@@ -208,7 +210,7 @@ div.sig .sig-name .n {
 }
 
 div.sphinxsidebar {
-  background: #0e162b;
+  background: #0d1821;
   color: var(--text);
 }
 
@@ -239,8 +241,14 @@ div.footer a {
 }
 
 ::selection {
-  background: #315d4b;
+  background: #245b58;
   color: var(--text);
+}
+
+/* Match the project focus language across native and generated docs. */
+:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 3px;
 }
 
 /* Make anchor navigation feel intentional instead of inheriting Alabaster's
