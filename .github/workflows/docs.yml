@@ -13,10 +13,15 @@ jobs:
         run: |
           python3 docs/api/check_headers.py
           python3 tests/unit/check_headers_test.py
-      - name: Build documentation image
-        run: docker build -f docs/api/Dockerfile -t beatglass-docs .
+      - name: Install documentation toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-18 python3-venv python3-pip pkg-config qt6-base-dev ca-certificates
+          python3 -m venv "$RUNNER_TEMP/beatglass-docs"
+          "$RUNNER_TEMP/beatglass-docs/bin/pip" install --upgrade pip
+          "$RUNNER_TEMP/beatglass-docs/bin/pip" install -r docs/api/requirements.txt
       - name: Build documentation
-        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" beatglass-docs sphinx-build --keep-going -b html -c docs/api . /work/build/docs/html
+        run: "$RUNNER_TEMP/beatglass-docs/bin/sphinx-build --keep-going -b html -c docs/api . build/docs/html"
       - name: Move API landing page to artifact root
         run: python3 docs/api/flatten_site.py build/docs/html
       - name: Check rendered declarations
