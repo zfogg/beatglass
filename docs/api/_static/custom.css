@@ -69,6 +69,8 @@ div.body .highlight {
   --text: #f4f0eb;
   --muted: #c5c7d1;
   --mint: #a7e8c3;
+  --sky: #a9dcff;
+  --rose: #f3b4c8;
   --lavender: #d8c7f4;
   --peach: #f5c4b3;
   --border: #435064;
@@ -156,6 +158,35 @@ div.highlight {
   background: #0a0f1d;
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+
+/* Keep C++ tokens legible against the dark code surface.  Alabaster's
+   default Pygments colors are too saturated/dim here, and its bold names
+   otherwise fall back to white. */
+div.highlight .k,
+div.highlight .kc,
+div.highlight .kd,
+div.highlight .kn,
+div.highlight .kp,
+div.highlight .kr,
+div.highlight .kt {
+  color: var(--sky);
+  font-weight: 600;
+}
+
+div.highlight .nc,
+div.highlight .nd,
+div.highlight .ne,
+div.highlight .nf,
+div.highlight .fm,
+div.highlight .nn {
+  color: var(--rose);
+}
+
+div.highlight .nc,
+div.highlight .nf,
+div.highlight .fm {
+  font-weight: 600;
 }
 
 div.sphinxsidebar {
