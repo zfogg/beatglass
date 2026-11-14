@@ -206,6 +206,16 @@ div.highlight .fm {
   color: var(--rose);
 }
 
+.sig .api-function-name {
+  color: var(--rose);
+  font-weight: 600;
+}
+
+.sig .api-keyword {
+  color: var(--sky);
+  font-weight: 600;
+}
+
 /* Alabaster's declaration rule is more specific than the base signature
    selector, so give signature keywords an explicit winning rule. */
 div.body .sig .kt,

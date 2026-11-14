@@ -15,6 +15,7 @@ copyright = f"Zachary Fogg {datetime.now().year}"
 templates_path = ["_templates"]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_js_files = ["signature_tokens.js"]
 html_sidebars = {"**": ["searchbox.html", "docsnav.html", "localtoc.html"]}
 exclude_patterns = [".worktree-*", "build", ".git", "tests/fixtures/generated"]
 
