@@ -189,6 +189,24 @@ div.highlight .fm {
   font-weight: 600;
 }
 
+/* Hawkmoth renders API declarations as signature markup rather than a
+   Pygments block. Keep the same semantic palette in those declarations. */
+div.sig .k,
+div.sig .kc,
+div.sig .kd,
+div.sig .kn,
+div.sig .kp,
+div.sig .kr,
+div.sig .kt {
+  color: var(--sky);
+  font-weight: 600;
+}
+
+div.sig .sig-name,
+div.sig .sig-name .n {
+  color: var(--rose);
+}
+
 div.sphinxsidebar {
   background: #0e162b;
   color: var(--text);
