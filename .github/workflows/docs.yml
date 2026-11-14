@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.13"
       - name: Check header coverage
         run: |
           python3 docs/api/check_headers.py
@@ -16,10 +20,9 @@ jobs:
       - name: Install documentation toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends clang-18 python3-venv python3-pip pkg-config qt6-base-dev ca-certificates
-          python3 -m venv "$RUNNER_TEMP/beatglass-docs"
-          "$RUNNER_TEMP/beatglass-docs/bin/pip" install --upgrade pip
-          "$RUNNER_TEMP/beatglass-docs/bin/pip" install -r docs/api/requirements.txt
+          sudo apt-get install -y --no-install-recommends clang-18 pkg-config qt6-base-dev ca-certificates
+          uv venv --python 3.12 "$RUNNER_TEMP/beatglass-docs"
+          uv pip install --python "$RUNNER_TEMP/beatglass-docs/bin/python" -r docs/api/requirements.txt
       - name: Build documentation
         run: "$RUNNER_TEMP/beatglass-docs/bin/sphinx-build --keep-going -b html -c docs/api . build/docs/html"
       - name: Move API landing page to artifact root
