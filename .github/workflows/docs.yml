@@ -20,7 +20,7 @@ jobs:
       - name: Install documentation toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends clang-18 pkg-config qt6-base-dev ca-certificates
+          sudo apt-get install -y --no-install-recommends clang-20 pkg-config qt6-base-dev ca-certificates
           uv venv --python 3.12 "$RUNNER_TEMP/beatglass-docs"
           uv pip install --python "$RUNNER_TEMP/beatglass-docs/bin/python" -r docs/api/requirements.txt
       - name: Build documentation
