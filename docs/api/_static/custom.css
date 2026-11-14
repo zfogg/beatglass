@@ -202,7 +202,6 @@ div.highlight .fm {
   font-weight: 600;
 }
 
-.sig .sig-name,
 .sig .sig-name .n {
   color: var(--rose);
 }
